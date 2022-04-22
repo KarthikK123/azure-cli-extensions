@@ -36,6 +36,7 @@ def load_arguments(self, _):
         c.argument('cl_oid', options_list=['--custom-locations-oid'], help="OID of 'custom-locations' app")
         c.argument('onboarding_timeout', options_list=['--onboarding-timeout'], arg_group='Timeout', help='Time required (in seconds) for the arc-agent pods to be installed on the kubernetes cluster. Override this value if the hardware/network constraints on your cluster requires more time for installing the arc-agent pods.')
         c.argument('no_wait', options_list=['--no-wait'], arg_group='Timeout', help="Do not wait for the long-running operation to finish.")
+        c.argument('enable_namespace_resources', options_list=['--enable-namespace-resources'], help="Enables Namespace as an ARM resource")
 
     with self.argument_context('connectedk8s update') as c:
         c.argument('cluster_name', options_list=['--name', '-n'], id_part='name', help='The name of the connected cluster.')
@@ -47,6 +48,7 @@ def load_arguments(self, _):
         c.argument('proxy_cert', options_list=['--proxy-cert'], arg_group='Proxy', type=file_type, completer=FilesCompleter(), help='Path to the any additional certificate file (for proxy as well)')
         c.argument('disable_proxy', options_list=['--disable-proxy'], arg_group='Proxy', action='store_true', help='Disables proxy settings for agents')
         c.argument('auto_upgrade', options_list=['--auto-upgrade'], help='Flag to enable/disable auto upgrade of arc agents. By default, auto upgrade of agents is enabled.', arg_type=get_enum_type(["true", "false"]))
+        c.argument('enable_namespace_resources', options_list=['--enable-namespace-resources'], help="Enables Namespace as an ARM resource")
 
     with self.argument_context('connectedk8s upgrade') as c:
         c.argument('cluster_name', options_list=['--name', '-n'], id_part='name', help='The name of the connected cluster.')
@@ -89,3 +91,4 @@ def load_arguments(self, _):
         c.argument('context_name', options_list=['--kube-context'], help='If specified, overwrite the default context name.')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), default=os.path.join(os.path.expanduser('~'), '.kube', 'config'), help="Kubernetes configuration file to update. If not provided, updates the file '~/.kube/config'. Use '-' to print YAML to stdout instead.")
         c.argument('api_server_port', options_list=['--port'], help='Port used for accessing connected cluster.')
+        c.argument('namespace', options_list=['--namespace'], help='Cluster Credentials are retrieved at this namespace scope.')

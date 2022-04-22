@@ -6,6 +6,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is regenerated.
 # --------------------------------------------------------------------------
 from typing import TYPE_CHECKING
+from unicodedata import name
 import warnings
 
 from azure.core.exceptions import ClientAuthenticationError, HttpResponseError, ResourceExistsError, ResourceNotFoundError, map_error
@@ -432,6 +433,7 @@ class ConnectedClusterOperations(object):
         resource_group_name,  # type: str
         cluster_name,  # type: str
         properties,  # type: "_models.ListClusterUserCredentialProperties"
+        namespace, # type: str
         **kwargs  # type: Any
     ):
         # type: (...) -> "_models.CredentialResults"
@@ -461,12 +463,20 @@ class ConnectedClusterOperations(object):
         accept = "application/json"
 
         # Construct URL
-        url = self.list_cluster_user_credential.metadata['url']  # type: ignore
+        if namespace is None:
+            url = self.list_cluster_user_credential.metadata['url']  # type: ignore
+        else:
+            url = self.list_cluster_user_credential.metadata['namespaceScopeUrl']
+            api_version = "2021-12-01-preview"
+
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
         }
+        if namespace is not None:
+            print(namespace)
+            path_format_arguments["namespaceName"]=self._serialize.url("namespace", namespace, 'str')
         url = self._client.format_url(url, **path_format_arguments)
 
         # Construct parameters
@@ -496,7 +506,7 @@ class ConnectedClusterOperations(object):
             return cls(pipeline_response, deserialized, {})
 
         return deserialized
-    list_cluster_user_credential.metadata = {'url': '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/listClusterUserCredential'}  # type: ignore
+    list_cluster_user_credential.metadata = {'url': '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/listClusterUserCredential', "namespaceScopeUrl": '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/providers/Microsoft.KubernetesConfiguration/namespaces/{namespaceName}/listUserCredential'}  # type: ignore
 
     def list_by_resource_group(
         self,

@@ -58,7 +58,7 @@ logger = get_logger(__name__)
 
 def create_connectedk8s(cmd, client, resource_group_name, cluster_name, https_proxy="", http_proxy="", no_proxy="", proxy_cert="", location=None,
                         kube_config=None, kube_context=None, no_wait=False, tags=None, distribution='auto', infrastructure='auto',
-                        disable_auto_upgrade=False, cl_oid=None, onboarding_timeout="600"):
+                        disable_auto_upgrade=False, cl_oid=None, onboarding_timeout="600", enable_namespace_resources=False):
     logger.warning("This operation might take a while...\n")
 
     # Setting subscription id and tenant Id
@@ -293,7 +293,7 @@ def create_connectedk8s(cmd, client, resource_group_name, cluster_name, https_pr
     utils.helm_install_release(chart_path, subscription_id, kubernetes_distro, kubernetes_infra, resource_group_name, cluster_name,
                                location, onboarding_tenant_id, http_proxy, https_proxy, no_proxy, proxy_cert, private_key_pem, kube_config,
                                kube_context, no_wait, values_file_provided, values_file, azure_cloud, disable_auto_upgrade, enable_custom_locations,
-                               custom_locations_oid, helm_client_location, onboarding_timeout)
+                               custom_locations_oid, helm_client_location, onboarding_timeout, enable_namespace_resources)
 
     return put_cc_response
 
@@ -775,7 +775,7 @@ def update_connectedk8s(cmd, instance, tags=None):
 
 
 def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy="", http_proxy="", no_proxy="", proxy_cert="",
-                  disable_proxy=False, kube_config=None, kube_context=None, auto_upgrade=None):
+                  disable_proxy=False, kube_config=None, kube_context=None, auto_upgrade=None, enable_namespace_resources=False):
     logger.warning("This operation might take a while...\n")
 
     # Send cloud information to telemetry
@@ -801,7 +801,7 @@ def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy=""
 
     proxy_cert = proxy_cert.replace('\\', r'\\\\')
 
-    if https_proxy == "" and http_proxy == "" and no_proxy == "" and proxy_cert == "" and not disable_proxy and not auto_upgrade:
+    if https_proxy == "" and http_proxy == "" and no_proxy == "" and proxy_cert == "" and not disable_proxy and not auto_upgrade and not enable_namespace_resources:
         raise RequiredArgumentMissingError(consts.No_Param_Error)
 
     if (https_proxy or http_proxy or no_proxy) and disable_proxy:
@@ -923,6 +923,8 @@ def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy=""
         cmd_helm_upgrade.extend(["--kubeconfig", kube_config])
     if kube_context:
         cmd_helm_upgrade.extend(["--kube-context", kube_context])
+    if enable_namespace_resources:
+        cmd_helm_upgrade.extend(["--set", "systemDefaultValues.resourceSyncAgent.enableNamespaceResources={}".format(True)])
     response_helm_upgrade = Popen(cmd_helm_upgrade, stdout=PIPE, stderr=PIPE)
     _, error_helm_upgrade = response_helm_upgrade.communicate()
     if response_helm_upgrade.returncode != 0:
@@ -1622,7 +1624,8 @@ def client_side_proxy_wrapper(cmd,
                               token=None,
                               path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                               context_name=None,
-                              api_server_port=consts.API_SERVER_PORT):
+                              api_server_port=consts.API_SERVER_PORT,
+                              namespace=None):
 
     cloud = send_cloud_telemetry(cmd)
     if cloud == consts.Azure_USGovCloudName:
@@ -1817,7 +1820,7 @@ def client_side_proxy_wrapper(cmd,
         args.append("-d")
         debug_mode = True
 
-    client_side_proxy_main(cmd, tenantId, client, resource_group_name, cluster_name, 0, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=None)
+    client_side_proxy_main(cmd, tenantId, client, resource_group_name, cluster_name, 0, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=None, namespace=namespace)
 
 
 # Prepare data as needed by client proxy executable
@@ -1852,15 +1855,16 @@ def client_side_proxy_main(cmd,
                            token=None,
                            path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                            context_name=None,
-                           clientproxy_process=None):
-    expiry, clientproxy_process = client_side_proxy(cmd, tenantId, client, resource_group_name, cluster_name, 0, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=None)
+                           clientproxy_process=None,
+                           namespace=None):
+    expiry, clientproxy_process = client_side_proxy(cmd, tenantId, client, resource_group_name, cluster_name, 0, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=None, namespace=namespace)
     next_refresh_time = expiry - consts.CSP_REFRESH_TIME
 
     while(True):
         time.sleep(60)
         if(clientproxyutils.check_if_csp_is_running(clientproxy_process)):
             if time.time() >= next_refresh_time:
-                expiry, clientproxy_process = client_side_proxy(cmd, tenantId, client, resource_group_name, cluster_name, 1, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=clientproxy_process)
+                expiry, clientproxy_process = client_side_proxy(cmd, tenantId, client, resource_group_name, cluster_name, 1, args, client_proxy_port, api_server_port, operating_system, creds, user_type, debug_mode, token=token, path=path, context_name=context_name, clientproxy_process=clientproxy_process, namespace=namespace)
                 next_refresh_time = expiry - consts.CSP_REFRESH_TIME
         else:
             telemetry.set_exception(exception='Process closed externally.', fault_type=consts.Proxy_Closed_Externally_Fault_Type,
@@ -1884,7 +1888,8 @@ def client_side_proxy(cmd,
                       token=None,
                       path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                       context_name=None,
-                      clientproxy_process=None):
+                      clientproxy_process=None,
+                      namespace=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if token is not None:
@@ -1898,7 +1903,7 @@ def client_side_proxy(cmd,
             authentication_method=auth_method,
             client_proxy=True
         )
-        response = client.list_cluster_user_credential(resource_group_name, cluster_name, list_prop)
+        response = client.list_cluster_user_credential(resource_group_name, cluster_name, list_prop, namespace)
     except Exception as e:
         if flag == 1:
             clientproxy_process.terminate()
