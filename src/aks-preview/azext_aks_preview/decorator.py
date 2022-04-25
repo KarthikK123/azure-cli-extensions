@@ -2183,6 +2183,11 @@ class AKSPreviewCreateDecorator(AKSCreateDecorator):
                 )
 
         return mc
+    
+    def set_up_enable_namespace_resource(self, mc: ManagedCluster) -> ManagedCluster:
+        if self.context.raw_param.get("enable_namespace_resources"):
+            mc.enable_namespace_resources = True
+        return mc
 
     def construct_mc_preview_profile(self) -> ManagedCluster:
         """The overall controller used to construct the preview ManagedCluster profile.
@@ -2213,6 +2218,8 @@ class AKSPreviewCreateDecorator(AKSCreateDecorator):
 
         mc = self.set_up_azure_keyvault_kms(mc)
         mc = self.set_up_creationdata_of_cluster_snapshot(mc)
+        mc = self.set_up_enable_namespace_resource(mc)
+        print(mc.enable_namespace_resources)
         return mc
 
     def create_mc_preview(self, mc: ManagedCluster) -> ManagedCluster:
