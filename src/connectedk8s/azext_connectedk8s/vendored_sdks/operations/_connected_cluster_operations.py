@@ -475,7 +475,6 @@ class ConnectedClusterOperations(object):
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
         }
         if namespace is not None:
-            print(namespace)
             path_format_arguments["namespaceName"]=self._serialize.url("namespace", namespace, 'str')
         url = self._client.format_url(url, **path_format_arguments)
 
