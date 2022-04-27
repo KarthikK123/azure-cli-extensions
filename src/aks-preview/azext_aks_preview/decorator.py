@@ -2185,6 +2185,10 @@ class AKSPreviewCreateDecorator(AKSCreateDecorator):
         return mc
     
     def set_up_enable_namespace_resource(self, mc: ManagedCluster) -> ManagedCluster:
+        """Sets the property to enable namespace as an ARM resource
+
+        :return: the ManagedCluster object
+        """
         if self.context.raw_param.get("enable_namespace_resources"):
             mc.enable_namespace_resources = True
         return mc
@@ -2219,7 +2223,6 @@ class AKSPreviewCreateDecorator(AKSCreateDecorator):
         mc = self.set_up_azure_keyvault_kms(mc)
         mc = self.set_up_creationdata_of_cluster_snapshot(mc)
         mc = self.set_up_enable_namespace_resource(mc)
-        print(mc.enable_namespace_resources)
         return mc
 
     def create_mc_preview(self, mc: ManagedCluster) -> ManagedCluster:
@@ -2551,6 +2554,15 @@ class AKSPreviewUpdateDecorator(AKSUpdateDecorator):
                 )
 
         return mc
+    
+    def update_enable_namespace_resources(self, mc: ManagedCluster) -> ManagedCluster:
+        """Sets the property to enable namespace as an ARM resource
+
+        :return: the ManagedCluster object
+        """
+        if self.context.raw_param.get("enable_namespace_resources"):
+            mc.enable_namespace_resources = True
+        return mc
 
     def patch_mc(self, mc: ManagedCluster) -> ManagedCluster:
         """Helper function to patch the ManagedCluster object.
@@ -2594,6 +2606,7 @@ class AKSPreviewUpdateDecorator(AKSUpdateDecorator):
 
         mc = self.update_http_proxy_config(mc)
         mc = self.update_azure_keyvault_kms(mc)
+        mc = self.update_enable_namespace_resources(mc)
         return mc
 
     def update_mc_preview(self, mc: ManagedCluster) -> ManagedCluster:
