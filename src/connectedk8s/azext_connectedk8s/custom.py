@@ -58,7 +58,7 @@ logger = get_logger(__name__)
 
 def create_connectedk8s(cmd, client, resource_group_name, cluster_name, https_proxy="", http_proxy="", no_proxy="", proxy_cert="", location=None,
                         kube_config=None, kube_context=None, no_wait=False, tags=None, distribution='auto', infrastructure='auto',
-                        disable_auto_upgrade=False, cl_oid=None, onboarding_timeout="600", enable_namespace_resources=False):
+                        disable_auto_upgrade=False, cl_oid=None, onboarding_timeout="600", enable_namespace_resource=False):
     logger.warning("This operation might take a while...\n")
 
     # Setting subscription id and tenant Id
@@ -293,7 +293,7 @@ def create_connectedk8s(cmd, client, resource_group_name, cluster_name, https_pr
     utils.helm_install_release(chart_path, subscription_id, kubernetes_distro, kubernetes_infra, resource_group_name, cluster_name,
                                location, onboarding_tenant_id, http_proxy, https_proxy, no_proxy, proxy_cert, private_key_pem, kube_config,
                                kube_context, no_wait, values_file_provided, values_file, azure_cloud, disable_auto_upgrade, enable_custom_locations,
-                               custom_locations_oid, helm_client_location, onboarding_timeout, enable_namespace_resources)
+                               custom_locations_oid, helm_client_location, onboarding_timeout, enable_namespace_resource)
 
     return put_cc_response
 
@@ -775,7 +775,7 @@ def update_connectedk8s(cmd, instance, tags=None):
 
 
 def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy="", http_proxy="", no_proxy="", proxy_cert="",
-                  disable_proxy=False, kube_config=None, kube_context=None, auto_upgrade=None, enable_namespace_resources=False):
+                  disable_proxy=False, kube_config=None, kube_context=None, auto_upgrade=None, enable_namespace_resource=False):
     logger.warning("This operation might take a while...\n")
 
     # Send cloud information to telemetry
@@ -801,7 +801,7 @@ def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy=""
 
     proxy_cert = proxy_cert.replace('\\', r'\\\\')
 
-    if https_proxy == "" and http_proxy == "" and no_proxy == "" and proxy_cert == "" and not disable_proxy and not auto_upgrade and not enable_namespace_resources:
+    if https_proxy == "" and http_proxy == "" and no_proxy == "" and proxy_cert == "" and not disable_proxy and not auto_upgrade and not enable_namespace_resource:
         raise RequiredArgumentMissingError(consts.No_Param_Error)
 
     if (https_proxy or http_proxy or no_proxy) and disable_proxy:
@@ -923,7 +923,7 @@ def update_agents(cmd, client, resource_group_name, cluster_name, https_proxy=""
         cmd_helm_upgrade.extend(["--kubeconfig", kube_config])
     if kube_context:
         cmd_helm_upgrade.extend(["--kube-context", kube_context])
-    if enable_namespace_resources:
+    if enable_namespace_resource:
         cmd_helm_upgrade.extend(["--set", "systemDefaultValues.resourceSyncAgent.enableNamespaceResources={}".format(True)])
     response_helm_upgrade = Popen(cmd_helm_upgrade, stdout=PIPE, stderr=PIPE)
     _, error_helm_upgrade = response_helm_upgrade.communicate()

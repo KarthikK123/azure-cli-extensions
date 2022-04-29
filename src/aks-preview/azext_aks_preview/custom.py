@@ -971,7 +971,7 @@ def aks_get_credentials(cmd,    # pylint: disable=unused-argument
                 resource_group_name, name, serverType, credential_format, namespace_name)
         elif user.lower() == 'clustermonitoringuser':
             credentialResults = client.list_cluster_monitoring_user_credentials(
-                resource_group_name, name, serverType, namespace_name=namespace_name)
+                resource_group_name, name, serverType)
         else:
             raise CLIError("The user is invalid.")
     if not credentialResults:
