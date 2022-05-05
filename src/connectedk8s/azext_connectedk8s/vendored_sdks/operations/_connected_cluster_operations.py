@@ -497,7 +497,7 @@ class ConnectedClusterOperations(object):
             return cls(pipeline_response, deserialized, {})
 
         return deserialized
-    list_cluster_user_credential.metadata = {'url': '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/listClusterUserCredential', "namespaceScopeUrl": '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/providers/Microsoft.KubernetesConfiguration/namespaces/{namespaceName}/listUserCredential'}  # type: ignore
+    list_cluster_user_credential.metadata = {'url': '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Kubernetes/connectedClusters/{clusterName}/listClusterUserCredential'}  # type: ignore
 
     def list_by_resource_group(
         self,
