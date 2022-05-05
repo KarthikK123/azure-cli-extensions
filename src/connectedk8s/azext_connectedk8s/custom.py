@@ -1908,10 +1908,8 @@ def client_side_proxy(cmd,
         else:
             from azext_connectedk8s.vendored_sdks.namespace_client import NamespaceClient
             from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-            print()
+            
             client= get_mgmt_service_client(cmd.cli_ctx, NamespaceClient)
-            print("Came here 0")
             response = client.list_user_credential(resource_group_name, "Microsoft.Kubernetes", "connectedClusters", cluster_name, namespace, list_prop)
     except Exception as e:
         if flag == 1:
