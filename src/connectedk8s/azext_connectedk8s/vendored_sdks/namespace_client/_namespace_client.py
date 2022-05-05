@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
     from typing import Any
 
+    from azure.core.credentials import TokenCredential
     from azure.core.rest import HttpRequest, HttpResponse
 
 class NamespaceClient(NamespaceClientOperationsMixin):
@@ -28,6 +29,8 @@ class NamespaceClient(NamespaceClientOperationsMixin):
     :vartype namespaces: namespace_client.operations.NamespacesOperations
     :ivar operations: Operations operations
     :vartype operations: namespace_client.operations.Operations
+    :param credential: Credential needed for the client to connect to Azure.
+    :type credential: ~azure.core.credentials.TokenCredential
     :param subscription_id: The Azure subscription ID. This is a GUID-formatted string (e.g.
      00000000-0000-0000-0000-000000000000).
     :type subscription_id: str
@@ -40,12 +43,13 @@ class NamespaceClient(NamespaceClientOperationsMixin):
 
     def __init__(
         self,
+        credential,  # type: "TokenCredential"
         subscription_id,  # type: str
         base_url="https://management.azure.com",  # type: str
         **kwargs  # type: Any
     ):
         # type: (...) -> None
-        self._config = NamespaceClientConfiguration(subscription_id=subscription_id, **kwargs)
+        self._config = NamespaceClientConfiguration(credential=credential, subscription_id=subscription_id, **kwargs)
         self._client = PipelineClient(base_url=base_url, config=self._config, **kwargs)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}

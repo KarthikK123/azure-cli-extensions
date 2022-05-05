@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 from copy import deepcopy
-from typing import Any, Awaitable
+from typing import Any, Awaitable, TYPE_CHECKING
 
 from msrest import Deserializer, Serializer
 
@@ -16,6 +16,10 @@ from .. import models
 from ._configuration import NamespaceClientConfiguration
 from .operations import NamespaceClientOperationsMixin, NamespacesOperations, Operations
 
+if TYPE_CHECKING:
+    # pylint: disable=unused-import,ungrouped-imports
+    from azure.core.credentials_async import AsyncTokenCredential
+
 class NamespaceClient(NamespaceClientOperationsMixin):
     """APIs used to get and list namespace resources through ARM for Kubernetes Clusters.
 
@@ -23,6 +27,8 @@ class NamespaceClient(NamespaceClientOperationsMixin):
     :vartype namespaces: namespace_client.aio.operations.NamespacesOperations
     :ivar operations: Operations operations
     :vartype operations: namespace_client.aio.operations.Operations
+    :param credential: Credential needed for the client to connect to Azure.
+    :type credential: ~azure.core.credentials_async.AsyncTokenCredential
     :param subscription_id: The Azure subscription ID. This is a GUID-formatted string (e.g.
      00000000-0000-0000-0000-000000000000).
     :type subscription_id: str
@@ -35,11 +41,12 @@ class NamespaceClient(NamespaceClientOperationsMixin):
 
     def __init__(
         self,
+        credential: "AsyncTokenCredential",
         subscription_id: str,
         base_url: str = "https://management.azure.com",
         **kwargs: Any
     ) -> None:
-        self._config = NamespaceClientConfiguration(subscription_id=subscription_id, **kwargs)
+        self._config = NamespaceClientConfiguration(credential=credential, subscription_id=subscription_id, **kwargs)
         self._client = AsyncPipelineClient(base_url=base_url, config=self._config, **kwargs)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
