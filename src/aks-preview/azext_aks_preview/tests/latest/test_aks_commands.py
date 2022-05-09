@@ -311,7 +311,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('enableNamespaceResources', True)
         ])
 
-    @AllowLargeResponse
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_get_credentials_at_namespace_scope(self, resource_group):
         aks_name = self.create_random_name('cliakstest', 16)
