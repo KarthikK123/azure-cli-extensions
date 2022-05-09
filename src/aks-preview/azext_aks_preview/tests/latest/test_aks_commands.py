@@ -6,6 +6,7 @@
 import base64
 import os
 import tempfile
+from time import sleep
 
 from azure.cli.testsdk import (
     ScenarioTest, live_only)
@@ -310,6 +311,19 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('enableNamespaceResources', True)
         ])
 
+    @AllowLargeResponse
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_get_credentials_at_namespace_scope(self, resource_group):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-namespace-resources --generate-ssh-keys'
+        self.cmd(create_cmd)
+        sleep(60) # Sleep for 60 seconds to allow hydration of namespaces
+        get_credentials_command = 'aks get-credentials --resource-group={resource_group} --name={name} --namespace default'
+        self.cmd(get_credentials_command)
     
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
