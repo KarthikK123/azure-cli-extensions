@@ -357,6 +357,7 @@ def load_arguments(self, _):
         c.argument('enable_oidc_issuer', action='store_true', is_preview=True)
         c.argument('enable_azure_keyvault_kms', action='store_true', is_preview=True)
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id, is_preview=True)
+        c.argument('enable_namespace_resources', help='Enables namespace as an ARM resource')
 
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name',
