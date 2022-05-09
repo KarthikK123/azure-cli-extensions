@@ -318,7 +318,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name
         })
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-namespace-resources --generate-ssh-keys'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-namespace-resources --generate-ssh-keys --enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001'
         self.cmd(create_cmd)
         sleep(60) # Sleep for 60 seconds to allow hydration of namespaces
         get_credentials_command = 'aks get-credentials --resource-group={resource_group} --name={name} --namespace default'
