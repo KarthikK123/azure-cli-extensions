@@ -318,11 +318,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name
         })
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-namespace-resources --generate-ssh-keys --enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-namespace-resources --generate-ssh-keys'
         self.cmd(create_cmd)
+        print("Cluster created, sleeping for 60 seconds")
         sleep(60) # Sleep for 60 seconds to allow hydration of namespaces
         get_credentials_command = 'aks get-credentials --resource-group={resource_group} --name={name} --namespace default'
-        self.cmd(get_credentials_command)
+        with self.assertRaisesRegExp(CLIError, "ListUserCredentials for Namespaces is not supported for non AAD clusters"): # ListUserCredential will fail for non-aad clusters. By verifying this error, we can verify that the call has reached the RP.
+            self.cmd(get_credentials_command) 
     
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
