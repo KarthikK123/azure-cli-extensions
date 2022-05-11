@@ -13,6 +13,7 @@ from azure.cli.testsdk import (
 from azure.cli.command_modules.acs._format import version_to_tuple
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 
 from .recording_processors import KeyReplacer
 from .custom_preparers import AKSCustomResourceGroupPreparer
@@ -323,7 +324,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         print("Cluster created, sleeping for 60 seconds")
         sleep(60) # Sleep for 60 seconds to allow hydration of namespaces
         get_credentials_command = 'aks get-credentials --resource-group={resource_group} --name={name} --namespace default'
-        with self.assertRaisesRegexp(CLIError, ".* ListUserCredentials for Namespaces is not supported for non AAD clusters.*"): # ListUserCredential will fail for non-aad clusters. By verifying this error, we can verify that the call has reached the RP.
+        with self.assertRaisesRegexp(HttpResponseError, ".* ListUserCredentials for Namespaces is not supported for non AAD clusters.*"): # ListUserCredential will fail for non-aad clusters. By verifying this error, we can verify that the call has reached the RP.
             self.cmd(get_credentials_command) 
     
     @AllowLargeResponse()
