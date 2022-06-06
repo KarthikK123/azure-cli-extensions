@@ -883,7 +883,8 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
                http_proxy_config=None,
                enable_azure_keyvault_kms=False,
                azure_keyvault_kms_key_id=None,
-               enable_namespace_resources=False):
+               enable_namespace_resources=False,
+               disable_namespace_resources=False):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
