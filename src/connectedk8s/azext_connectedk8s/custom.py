@@ -331,7 +331,7 @@ def create_connectedk8s(cmd, client, resource_group_name, cluster_name, correlat
     utils.helm_install_release(chart_path, subscription_id, kubernetes_distro, kubernetes_infra, resource_group_name, cluster_name,
                                location, onboarding_tenant_id, http_proxy, https_proxy, no_proxy, proxy_cert, private_key_pem, kube_config,
                                kube_context, no_wait, values_file_provided, values_file, azure_cloud, disable_auto_upgrade, enable_custom_locations,
-                               custom_locations_oid, helm_client_location, onboarding_timeout, enable_namespace_resource)
+                               custom_locations_oid, helm_client_location, enable_private_link, onboarding_timeout, enable_namespace_resource)
 
     return put_cc_response
 

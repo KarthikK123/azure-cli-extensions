@@ -37,7 +37,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'kubernetes==11.0.0',
     'pycryptodome==3.14.1',
-    'azure-core'
+    'azure-core',
     'azure-mgmt-hybridcompute==7.0.0'
 ]
 
