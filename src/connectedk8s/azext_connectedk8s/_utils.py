@@ -28,8 +28,12 @@ import azext_connectedk8s._constants as consts
 from kubernetes import client as kube_client
 from azure.cli.core import get_default_cli
 from azure.cli.core.azclierror import CLIInternalError, ClientRequestError, ArgumentUsageError, ManualInterrupt, AzureResponseError, AzureInternalError, ValidationError
+from azext_connectedk8s.telemetry_helper import log_telemetry
+# from opencensus.ext.azure.log_exporter import AzureLogHandler
 
-logger = get_logger(__name__)
+# INSTRUMENTATION_KEY = "InstrumentationKey=0d592a02-bd1b-4d9e-8c99-e129fc4ffcd0"
+# logger = get_logger(__name__)
+# logger.addHandler(AzureLogHandler(connection_string=INSTRUMENTATION_KEY))
 
 # pylint: disable=line-too-long
 # pylint: disable=bare-except
@@ -80,7 +84,7 @@ def get_chart_path(registry_path, kube_config, kube_context, helm_client_locatio
         if os.path.isdir(chart_export_path):
             shutil.rmtree(chart_export_path)
     except:
-        logger.warning("Unable to cleanup the azure-arc helm charts already present on the machine. In case of failure, please cleanup the directory '%s' and try again.", chart_export_path)
+        log_telemetry("Unable to cleanup the azure-arc helm charts already present on the machine. In case of failure, please cleanup the directory '%s' and try again.", chart_export_path)
     export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location)
 
     # Returning helm chart path
@@ -212,11 +216,11 @@ def kubernetes_exception_handler(ex, fault_type, summary, error_message='Error o
     if isinstance(ex, ApiException):
         status_code = ex.status
         if status_code == 403:
-            logger.warning(message_for_unauthorized_request)
+            log_telemetry(message_for_unauthorized_request)
         elif status_code == 404:
-            logger.warning(message_for_not_found)
+            log_telemetry(message_for_not_found)
         else:
-            logger.debug("Kubernetes Exception: " + str(ex))
+            log_telemetry("Kubernetes Exception: " + str(ex))
         if raise_error:
             telemetry.set_exception(exception=ex, fault_type=fault_type, summary=summary)
             raise ValidationError(error_message + "\nError Response: " + str(ex.body))
@@ -225,7 +229,7 @@ def kubernetes_exception_handler(ex, fault_type, summary, error_message='Error o
             telemetry.set_exception(exception=ex, fault_type=fault_type, summary=summary)
             raise ValidationError(error_message + "\nError: " + str(ex))
         else:
-            logger.debug("Kubernetes Exception: " + str(ex))
+            log_telemetry("Kubernetes Exception: " + str(ex))
 
 
 def validate_infrastructure_type(infra):
@@ -240,7 +244,7 @@ def get_values_file():
     values_file = os.getenv('HELMVALUESPATH')
     if (values_file is not None) and (os.path.isfile(values_file)):
         values_file_provided = True
-        logger.warning("Values files detected. Reading additional helm parameters from same.")
+        log_telemetry("Values files detected. Reading additional helm parameters from same.")
         # trimming required for windows os
         if (values_file.startswith("'") or values_file.startswith('"')):
             values_file = values_file[1:]
@@ -256,7 +260,7 @@ def ensure_namespace_cleanup():
     while True:
         if time.time() > timeout:
             telemetry.set_user_fault()
-            logger.warning("Namespace 'azure-arc' still in terminating state. Please ensure that you delete the 'azure-arc' namespace before onboarding the cluster again.")
+            log_telemetry("Namespace 'azure-arc' still in terminating state. Please ensure that you delete the 'azure-arc' namespace before onboarding the cluster again.")
             return
         try:
             api_response = api_instance.list_namespace(field_selector='metadata.name=azure-arc')
@@ -264,7 +268,7 @@ def ensure_namespace_cleanup():
                 return
             time.sleep(5)
         except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Error while retrieving namespace information: " + str(e))
+            log_telemetry("Error while retrieving namespace information: " + str(e))
             kubernetes_exception_handler(e, consts.Get_Kubernetes_Namespace_Fault_Type, 'Unable to fetch kubernetes namespace',
                                          raise_error=False)
 
@@ -349,7 +353,7 @@ def helm_install_release(chart_path, subscription_id, kubernetes_distro, kuberne
             telemetry.set_user_fault()
         telemetry.set_exception(exception=error_helm_install.decode("ascii"), fault_type=consts.Install_HelmRelease_Fault_Type,
                                 summary='Unable to install helm release')
-        logger.warning("Please check if the azure-arc namespace was deployed and run 'kubectl get pods -n azure-arc' to check if all the pods are in running state. A possible cause for pods stuck in pending state could be insufficient resources on the kubernetes cluster to onboard to arc.")
+        log_telemetry("Please check if the azure-arc namespace was deployed and run 'kubectl get pods -n azure-arc' to check if all the pods are in running state. A possible cause for pods stuck in pending state could be insufficient resources on the kubernetes cluster to onboard to arc.")
         raise CLIInternalError("Unable to install helm release: " + error_helm_install.decode("ascii"))
 
 
@@ -405,7 +409,7 @@ def try_list_node_fix():
 
         V1ContainerImage.names = V1ContainerImage.names.setter(names)
     except Exception as ex:
-        logger.debug("Error while trying to monkey patch the fix for list_node(): {}".format(str(ex)))
+        log_telemetry("Error while trying to monkey patch the fix for list_node(): {}".format(str(ex)))
 
 
 def check_provider_registrations(cli_ctx):
@@ -419,11 +423,11 @@ def check_provider_registrations(cli_ctx):
         kc_registration_state = rp_client.get(consts.Kubernetes_Configuration_Provider_Namespace).registration_state
         if kc_registration_state != "Registered":
             telemetry.set_user_fault()
-            logger.warning("{} provider is not registered".format(consts.Kubernetes_Configuration_Provider_Namespace))
+            log_telemetry("{} provider is not registered".format(consts.Kubernetes_Configuration_Provider_Namespace))
     except ValidationError as e:
         raise e
     except Exception as ex:
-        logger.warning("Couldn't check the required provider's registration status. Error: {}".format(str(ex)))
+        log_telemetry("Couldn't check the required provider's registration status. Error: {}".format(str(ex)))
 
 
 def can_create_clusterrolebindings():
@@ -439,7 +443,7 @@ def can_create_clusterrolebindings():
         response = api_instance.create_self_subject_access_review(access_review)
         return response.status.allowed
     except Exception as ex:
-        logger.warning("Couldn't check for the permission to create clusterrolebindings on this k8s cluster. Error: {}".format(str(ex)))
+        log_telemetry("Couldn't check for the permission to create clusterrolebindings on this k8s cluster. Error: {}".format(str(ex)))
         return "Unknown"
 
 
@@ -449,7 +453,7 @@ def validate_node_api_response(api_instance, node_api_response):
             node_api_response = api_instance.list_node()
             return node_api_response
         except Exception as ex:
-            logger.debug("Error occcured while listing nodes on this kubernetes cluster: {}".format(str(ex)))
+            log_telemetry("Error occcured while listing nodes on this kubernetes cluster: {}".format(str(ex)))
             return None
     else:
         return node_api_response

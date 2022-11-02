@@ -37,7 +37,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'kubernetes==24.2.0',
     'pycryptodome==3.14.1',
-    'azure-mgmt-hybridcompute==7.0.0'
+    'azure-mgmt-hybridcompute==7.0.0',
+    'opencensus-ext-azure==1.1.5'
 ]
 
 with open('README.md', 'r', encoding='utf-8') as f:

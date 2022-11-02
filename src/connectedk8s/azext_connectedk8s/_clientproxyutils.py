@@ -17,8 +17,13 @@ from azure.cli.core._profile import Profile
 from azure.cli.core import telemetry
 from azure.cli.core.azclierror import CLIInternalError
 from psutil import process_iter, NoSuchProcess, AccessDenied, ZombieProcess, net_connections
-from knack.log import get_logger
-logger = get_logger(__name__)
+from azext_connectedk8s.telemetry_helper import log_telemetry
+# from knack.log import get_logger
+# from opencensus.ext.azure.log_exporter import AzureLogHandler
+
+# INSTRUMENTATION_KEY = "InstrumentationKey=0d592a02-bd1b-4d9e-8c99-e129fc4ffcd0"
+# logger = get_logger(__name__)
+# logger.addHandler(AzureLogHandler(connection_string=INSTRUMENTATION_KEY))
 
 
 def check_if_port_is_open(port):
@@ -31,7 +36,7 @@ def check_if_port_is_open(port):
         telemetry.set_exception(exception=e, fault_type=consts.Port_Check_Fault_Type,
                                 summary='Failed to check if port is in use.')
         if platform.system() != 'Darwin':
-            logger.info("Failed to check if port is in use. " + str(e))
+            log_telemetry("Failed to check if port is in use. " + str(e))
         return False
     return False
 
