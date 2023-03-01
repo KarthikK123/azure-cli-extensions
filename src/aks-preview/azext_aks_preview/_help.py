@@ -109,13 +109,16 @@ helps['aks create'] = """
           type: string
           short-summary: The ID of an Azure Active Directory client application of type "Native". This
                          application is for user login via kubectl.
+          long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
         - name: --aad-server-app-id
           type: string
           short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This
                          application represents the managed cluster's apiserver (Server application).
+          long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
         - name: --aad-server-app-secret
           type: string
           short-summary: The secret of an Azure Active Directory server application.
+          long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
         - name: --aad-tenant-id
           type: string
           short-summary: The ID of an Azure Active Directory tenant.
@@ -189,7 +192,7 @@ helps['aks create'] = """
                 confcom                         - enable confcom addon, this will enable SGX device plugin by default(PREVIEW).
                 open-service-mesh               - enable Open Service Mesh addon (PREVIEW).
                 gitops                          - enable GitOps (PREVIEW).
-                azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon (PREVIEW).
+                azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon.
                 web_application_routing         - enable Web Application Routing addon (PREVIEW). Specify "--dns-zone-resource-id" to configure DNS.
         - name: --disable-rbac
           type: bool
@@ -1726,7 +1729,7 @@ long-summary: |-
         ingress-appgw                   - enable Application Gateway Ingress Controller addon (PREVIEW).
         open-service-mesh               - enable Open Service Mesh addon (PREVIEW).
         gitops                          - enable GitOps (PREVIEW).
-        azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon (PREVIEW).
+        azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon.
         web_application_routing         - enable Web Application Routing addon (PREVIEW). Specify "--dns-zone-resource-id" to configure DNS.
 parameters:
   - name: --addon -a
@@ -1868,7 +1871,7 @@ long-summary: |-
         ingress-appgw                   - enable Application Gateway Ingress Controller addon (PREVIEW).
         open-service-mesh               - enable Open Service Mesh addon (PREVIEW).
         gitops                          - enable GitOps (PREVIEW).
-        azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon (PREVIEW).
+        azure-keyvault-secrets-provider - enable Azure Keyvault Secrets Provider addon.
         web_application_routing         - enable Web Application Routing addon (PREVIEW). Specify "--dns-zone-resource-id" to configure DNS.
 parameters:
   - name: --addons -a

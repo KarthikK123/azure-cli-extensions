@@ -28,3 +28,23 @@ az network bastion show --name MyBastionHost --resource-group MyResourceGroup
 ```commandline
 az network bastion update --name MyBastionHost --resource-group MyResourceGroup --enable-tunneling
 ```
+
+### RDP to VM/VMSS using Azure Bastion host machine
+```commandline
+az network bastion rdp --name MyBastionHost --resource-group MyResourceGroup --target-resource-id ResourceId
+```
+
+### SSH to VM/VMSS using Azure Bastion host machine
+```commandline
+az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id ResourceId --auth-type password
+```
+
+### RDP to Target IP address using Azure Bastion
+```commandline
+az network bastion rdp --name MyBastionHost --resource-group MyResourceGroup --target-ip-address 10.1.1.1
+```
+
+### SSH to Target IP address using Azure Bastion
+```commandline
+az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-ip-address 10.1.1.1 --auth-type password
+```
