@@ -805,6 +805,7 @@ def aks_get_credentials(cmd,    # pylint: disable=unused-argument
                         client,
                         resource_group_name,
                         name,
+                        namespace_name=None,
                         admin=False,
                         user='clusterUser',
                         path=os.path.join(os.path.expanduser(
@@ -822,12 +823,14 @@ def aks_get_credentials(cmd,    # pylint: disable=unused-argument
         if admin:
             raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
+        if namespace_name is not None:
+            raise InvalidArgumentValueError("--namespace is not valid for admin credentials") # Do we want this?
         credentialResults = client.list_cluster_admin_credentials(
             resource_group_name, name, serverType)
     else:
         if user.lower() == 'clusteruser':
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType, credential_format)
+                resource_group_name, name, serverType, credential_format, namespace_name)
         elif user.lower() == 'clustermonitoringuser':
             credentialResults = client.list_cluster_monitoring_user_credentials(
                 resource_group_name, name, serverType)

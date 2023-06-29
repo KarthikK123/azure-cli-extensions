@@ -47,6 +47,7 @@ def load_arguments(self, _):
         c.argument('private_link_scope_resource_id', pls_arm_id_type)
         c.argument('onboarding_timeout', options_list=['--onboarding-timeout'], arg_group='Timeout', help='Time required (in seconds) for the arc-agent pods to be installed on the kubernetes cluster. Override this value if the hardware/network constraints on your cluster requires more time for installing the arc-agent pods.')
         c.argument('no_wait', options_list=['--no-wait'], arg_group='Timeout', help="Do not wait for the long-running operation to finish.")
+        c.argument('enable_namespace_resource', options_list=['--enable-namespace-resource'], help="Enables Namespace as an ARM resource")
         c.argument('correlation_id', options_list=['--correlation-id'], help='A guid that is used to internally track the source of cluster onboarding. Please do not modify it unless advised', validator=override_client_request_id_header)
         c.argument('container_log_path', help='Override the default container log path to enable fluent-bit logging')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
@@ -65,6 +66,7 @@ def load_arguments(self, _):
         c.argument('proxy_cert', options_list=['--proxy-cert', '--custom-ca-cert'], arg_group='Proxy', type=file_type, completer=FilesCompleter(), help='Path to the certificate file for proxy or custom Certificate Authority')
         c.argument('disable_proxy', options_list=['--disable-proxy'], arg_group='Proxy', action='store_true', help='Disables proxy settings for agents')
         c.argument('auto_upgrade', options_list=['--auto-upgrade'], help='Flag to enable/disable auto upgrade of arc agents. By default, auto upgrade of agents is enabled.', arg_type=get_enum_type(["true", "false"]))
+        c.argument('enable_namespace_resource', options_list=['--enable-namespace-resource'], help="Enables Namespace as an ARM resource")
         c.argument('container_log_path', help='Override the default container log path to enable fluent-bit logging')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -111,6 +113,7 @@ def load_arguments(self, _):
         c.argument('context_name', options_list=['--kube-context'], help='If specified, overwrite the default context name.')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), default=os.path.join(os.path.expanduser('~'), '.kube', 'config'), help="Kubernetes configuration file to update. If not provided, updates the file '~/.kube/config'. Use '-' to print YAML to stdout instead.")
         c.argument('api_server_port', options_list=['--port'], help='Port used for accessing connected cluster.')
+        c.argument('namespace', options_list=['--namespace'], help='Cluster Credentials are retrieved at this namespace scope.')
 
     with self.argument_context('connectedk8s troubleshoot') as c:
         c.argument('tags', tags_type)
